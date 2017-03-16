@@ -1,61 +1,76 @@
 // JS FOR REUSABLE CHART
 
-var dataset = [ ],
-	w = 500,
+var w = 500,
 	h = 100,
 	rw = 20,
 	selector = document.getElementById('color-change'),
+	button = document.getElementById('data-change'),
 
-	svg2 = d3.select("body")
+	t = d3.transition()
+		.duration(1750);
+		// .ease(d3.easeLinear);
+
+	svg = d3.select("body")
 	 .append("svg")
 	 .attr("height", h)
 	 .attr("width", w);
 
-function randomNum(set){
-	for(var i = 0; i<6; i++){
-		set.push(Math.round(Math.random() * 30));
-	}
-};
-randomNum(dataset);
-
-function chart(){
-	var	element = svg2,
-	color = 'teal';
+function chart(element){
+	var	chartColor;
+	var dataset = [ 2, 2, 2, 2, 2, 2];
 
 	function my2(){
 		element.selectAll("rect")
 		.data(dataset)
 		.enter()
 		.append("rect")
+
+		element.selectAll("rect").transition(t)
 		.attr("x", (d, i) => { return (i * 30) + 10 })
 		.attr("y", (d) => { return (h-(d*2)) })
 		.attr("width", rw)
 		.attr("height", (d) =>{ return (d * 2); })
-		.style("fill", this.chartColor);
+		.style("fill", chartColor);
 	}
 
 	my2.chartColor = function(c){
-		console.log("setter function ran for " + c);
 		chartColor = c;
+		return my2;
+	}
+
+	my2.getNewData = function(){
+		let set = [];
+		for(let i=0; i<6; i++){
+			set.push(Math.round(Math.random() * 30));
+		}
+		dataset = set;
 		return my2;
 	}
 	return my2;
 };
 
-function makeChart(color){
-	let newChart = chart().chartColor(color);
-	newChart();
-};
+var newChart = chart(svg).chartColor(selector.value);
+d3.select("svg")
+	.call(newChart);
 
-// doesn't work 
-selector.addEventListener(
-	"change",
+button.addEventListener(
+	"click",
 	function(){
-		makeChart(selector.value);
+		console.log("this clikced");
+		newChart.getNewData();
+		d3.select("svg")
+		.call(newChart);
 	}
 );
 
-makeChart('purple');
+selector.addEventListener(
+	"change",
+	function(){
+		newChart.chartColor(selector.value);
+		d3.select("svg")
+		.call(newChart);
+	}
+);
 
 
 
